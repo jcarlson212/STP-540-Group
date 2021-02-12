@@ -1,6 +1,15 @@
+/*
+    Description: The Following code implements basic QR decomposition and solves Xb = y 
+    for b s.t. b minimizes d(Xb, y) where d is the euclidean metric.
+
+    Author: Jason Carlson
+*/
+
 #include <iostream>
 #include <vector>
 #include "math.h"
+#include <time.h> 
+#include <fstream>
 
 using namespace std;
 
@@ -41,9 +50,6 @@ vector<vector<double>> get_Q(vector<vector<double>>& X, int n, int m){
 
         //Here we normalize the column added to Q
         for(int row=0; row < n; ++row){
-            if(col == 0){
-                cout << Q[row][col] << " " << sqrt(total) <<"\n\n";
-            }
             Q[row][col] = Q[row][col] / sqrt(total);
         }
     }
@@ -149,7 +155,7 @@ int main(){
     print_matrix(test.second);
     cout << "Product of Q with R: \n";
     vector<vector<double>> product = mult(test.first, test.second);
-    print_matrix(product);
+    print_matrix(product); //Notice this is the same as the original matrix (up to like 15 decimal places)
 
 
     vector<vector<double>> y = {{1},{2},{3}};
@@ -164,6 +170,35 @@ int main(){
         cout << beta[i] << " ";
     }
 
-    //The true values are 0.247179, 1.22031, -.102096
+    //The true values are 0.247179, 1.22031, -.102096 (which are the same)
+
+
+//-------------------------------------------------------------------------------------
+//Here we test the QR decomposition algorithm for various n by n matrices to exhibit O(n^3) time complexity
+    int n = 1;
+    vector<double> times;
+    for(; n <= 400; n++){
+        vector<vector<double>> X2(n, vector<double>(n, 0));
+        for(int i=0; i < n; ++i){
+            for(int j=0; j < n; ++j){
+                X2[i][j] = (double) rand();
+            }
+        }
+        clock_t t = clock();
+        test = decompose(X2, n, n);
+        t = clock() - t;
+        times.push_back(((float)t)/CLOCKS_PER_SEC);
+        //printf ("It took %.18f seconds. for n = %d\n",((float)t)/CLOCKS_PER_SEC, n);
+    }
+
+    ofstream data("output.txt");
+    for(int i=0; i < times.size(); ++i){
+        data << times[i] << "\n";
+    }
+
+//See the output.txt file for the exact values
+    
+
+
     return 0;
 }
